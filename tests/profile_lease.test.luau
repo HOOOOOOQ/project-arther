@@ -1,0 +1,25 @@
+local Schema = require("../src/ServerScriptService/Services/ProfileSchema")
+local Lease = require("../src/ServerScriptService/Services/ProfileLease")
+local v1 = { schemaVersion = 1, level = 4, xp = 12, gold = 345, class = "Warrior" }
+local migrated = assert(Schema.migrate(v1))
+assert(migrated.schemaVersion == 2 and migrated.level == 4 and migrated.gold == 345 and migrated.inventory.tonic == 2)
+assert(v1.schemaVersion == 1 and v1.inventory == nil)
+local record = assert(Lease.acquire({data = v1}, "owner", 100, 180))
+assert(record.data.schemaVersion == 2 and record.session.expires == 280)
+assert(not Lease.acquire(record, "other", 150, 180))
+assert(Lease.acquire(record, "other", 280, 180))
+assert(not Lease.write(record, "other", 150, 180, migrated, false))
+assert(not Lease.write(record, "owner", 280, 180, migrated, false))
+local renewed = assert(Lease.write(record, "owner", 200, 180, migrated, false))
+assert(renewed.session.expires == 380)
+local released = assert(Lease.write(renewed, "owner", 210, 180, migrated, true))
+assert(released.session == nil and released.data.gold == 345)
+assert(not Lease.acquire({data = v1, session = {expires = 123}}, "x", 200, 180))
+assert(not Lease.acquire({data = v1, futureField = 1}, "x", 200, 180))
+local bad = Schema.new(); bad.inventory.tonic = -1
+assert(not Schema.migrate(bad))
+bad = Schema.new(); bad.inventory.unknown = 1
+assert(not Schema.migrate(bad))
+bad = Schema.new(); bad.extra = true
+assert(not Schema.migrate(bad))
+print("PASS: schema migration and lease ownership")

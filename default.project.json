@@ -1,0 +1,20 @@
+{
+  "name": "PROJECT AETHER",
+  "tree": {
+    "$className": "DataModel",
+    "Workspace": { "$properties": { "StreamingEnabled": true } },
+    "ReplicatedStorage": {
+      "Shared": { "$path": "src/ReplicatedStorage/Shared" }
+    },
+    "ServerScriptService": {
+      "ServerBootstrap": { "$path": "src/ServerScriptService/ServerBootstrap.server.luau" },
+      "Services": { "$path": "src/ServerScriptService/Services" }
+    },
+    "StarterPlayer": {
+      "StarterPlayerScripts": {
+        "ClientBootstrap": { "$path": "src/StarterPlayer/StarterPlayerScripts/ClientBootstrap.client.luau" },
+        "Controllers": { "$path": "src/StarterPlayer/StarterPlayerScripts/Controllers" }
+      }
+    }
+  }
+}
